@@ -20,7 +20,7 @@ Things you may want to cover:
 
 * Database creation
 
-  sqlite3
+  postgresql
 
 * Database initialization
 
