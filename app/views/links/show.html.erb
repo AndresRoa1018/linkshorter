@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Initial link:</strong>
+  <%= @link.initial_link %>
+</p>
+
+<p>
+  <strong>Shorted link:</strong>
+  <%= @link.shorted_link %>
+</p>
+
+<p>
+  <strong>Info:</strong>
+  <%= @link.info %>
+</p>
+
+<%= link_to 'Edit', edit_link_path(@link) %> |
+<%= link_to 'Back', links_path %>
