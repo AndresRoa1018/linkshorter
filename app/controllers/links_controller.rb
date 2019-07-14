@@ -1,6 +1,6 @@
 class LinksController < ApplicationController
-  before_action :set_link, only: [:show, :edit, :update, :destroy]
-
+  # before_action :set_link, only: [:show, :edit, :update, :destroy, :shortered]
+  before_action :find_url, only: [:show, :shortened]
   # GET /links
   # GET /links.json
   def index
@@ -10,6 +10,8 @@ class LinksController < ApplicationController
   # GET /links/1
   # GET /links/1.json
   def show
+    @url.update_attribute('access_counter' , (@url.access_counter.nil? ? 0 : @url.access_counter) + 1)
+    redirect_to @url.info
   end
 
   # GET /links/new
@@ -22,7 +24,6 @@ class LinksController < ApplicationController
   end
 
   def shorter_server
-
     link = params['link'].gsub("\"", '')
     result = BITLY.shorten(link)
 
@@ -35,17 +36,28 @@ class LinksController < ApplicationController
   def create
     @link = Link.new(link_params)
 
-    @link.short_link
+    @link.sanitize
 
-    respond_to do |format|
+    if @link.new_url?
       if @link.save
-        format.html { redirect_to @link, notice: 'Link was successfully created.' }
-        format.json { render :show, status: :created, location: @link }
+        redirect_to shortened_path(@link.shorted_link)
       else
-        format.html { render :new }
-        format.json { render json: @link.errors, status: :unprocessable_entity }
+        render 'index'
       end
+    else
+      redirect_to shortened_path(@link.shorted_link)
     end
+    # @link.short_link
+
+    # respond_to do |format|
+    #   if @link.save
+    #     format.html { redirect_to @link, notice: 'Link was successfully created.' }
+    #     format.json { render :show, status: :created, location: @link }
+    #   else
+    #     format.html { render :new }
+    #     format.json { render json: @link.errors, status: :unprocessable_entity }
+    #   end
+    # end
   end
 
   # PATCH/PUT /links/1
@@ -72,10 +84,32 @@ class LinksController < ApplicationController
     end
   end
 
+  def shortened
+    @url = Link.find_by_shorted_link(params[:shorted_link])
+    host = request.host_with_port
+    @original_url = @url.info
+    @short_url = host + '/' + @url.shorted_link
+
+    redirect_to links_path
+  end
+
+  def fetch_originla_url
+    fetch_url = Link.find_by_shoted_link(params[:shorted_link])
+    redirect_to fetch_url.info
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_link
       @link = Link.find(params[:id])
+    end
+
+    def find_url
+      if params[:id]
+        @url = Link.find(params[:id])
+      else
+        @url = Link.find_by_shorted_link(params[:shorted_link])
+      end 
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.

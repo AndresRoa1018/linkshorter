@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 2019_07_07_195558) do
     t.string "initial_link"
     t.string "shorted_link"
     t.string "info"
+    t.integer "access_counter"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
